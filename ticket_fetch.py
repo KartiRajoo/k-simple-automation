@@ -1,13 +1,28 @@
-import json
+import requests
+from datetime import datetime, timedelta
 
-tickets = [
-    {"id": 101, "priority": "high", "resolution_time": 7200, "agent": "APAC"},
-    {"id": 102, "priority": "low", "resolution_time": 1800, "agent": "APAC"},
-    {"id": 103, "priority": "medium", "resolution_time": 4000, "agent": "APAC"},
-    {"id": 104, "priority": "high", "resolution_time": 9000, "agent": "APAC"},
-]
+ACCESS_TOKEN = "YOUR_INTERCOM_ACCESS_TOKEN"
 
-with open("tickets.json", "w") as f:
-    json.dump(tickets, f)
+url = "https://api.intercom.io/conversations"
 
-print("Tickets fetched")
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "Accept": "application/json"
+}
+
+response = requests.get(url, headers=headers)
+data = response.json()
+
+tickets = []
+
+for convo in data["conversations"]:
+    ticket = {
+        "id": convo["id"],
+        "priority": convo.get("priority", "normal"),
+        "created_at": convo["created_at"],
+        "assignee": convo.get("assignee", {}).get("name"),
+    }
+
+    tickets.append(ticket)
+
+print(tickets)
